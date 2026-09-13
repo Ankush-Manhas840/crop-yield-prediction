@@ -13,13 +13,14 @@ OPTIONS_PATH = "models/options.pkl"
 
 
 @st.cache_resource
-def load_or_train():
-    if os.path.exists(MODEL_PATH):
-        model = joblib.load(MODEL_PATH)
-        columns = joblib.load(COLUMNS_PATH)
-        options = joblib.load(OPTIONS_PATH)
-        return model, columns, options
+def load_cached_model():
+    model = joblib.load(MODEL_PATH)
+    columns = joblib.load(COLUMNS_PATH)
+    options = joblib.load(OPTIONS_PATH)
+    return model, columns, options
 
+
+def train_and_cache():
     with st.status(
         "First run on this server — no cached model found. Training now, this usually takes 1-2 minutes.",
         expanded=True,
@@ -85,7 +86,13 @@ def load_or_train():
     return model, columns, options
 
 
-model, columns, options = load_or_train()
+# Trained model isn't checked into the repo (see README). If two visitors both
+# hit a container that has never trained yet, both may train concurrently and
+# overwrite each other's saved files - harmless duplicate work, not a correctness bug.
+if os.path.exists(MODEL_PATH):
+    model, columns, options = load_cached_model()
+else:
+    model, columns, options = train_and_cache()
 
 st.title("Crop Yield Predictor")
 

@@ -1,6 +1,6 @@
 # Crop Yield Predictor
 
-**[Live demo](PASTE_STREAMLIT_URL_HERE)** — note: the first person to open it on a fresh deploy will see a 1-2 minute training step (the model isn't checked into the repo, see [Running it](#running-it) below).
+**[Live demo](https://crop-yield-prediction-wpnuufdz2fc9tmbm4k8t3y.streamlit.app/)** — note: the first person to open it on a fresh deploy will see a 1-2 minute training step (the model isn't checked into the repo, see [Running it](#running-it) below).
 
 A portfolio project that predicts crop yield (tonnes per hectare) for four Indian crops — Rice, Wheat, Maize, and Sugarcane — given state, season, year, and planted area.
 
