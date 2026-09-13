@@ -1,5 +1,7 @@
 # Crop Yield Predictor
 
+**[Live demo](PASTE_STREAMLIT_URL_HERE)** — note: the first person to open it on a fresh deploy will see a 1-2 minute training step (the model isn't checked into the repo, see [Running it](#running-it) below).
+
 A portfolio project that predicts crop yield (tonnes per hectare) for four Indian crops — Rice, Wheat, Maize, and Sugarcane — given state, season, year, and planted area.
 
 **This is not a forecasting tool and not production software.** It interpolates within the range of its training data; it does not predict the future. Its value is as evidence of a data-cleaning and modelling process, not as something you'd use to plan a harvest. A pivot table over the same cleaned data would approximate a lot of what this does — what the model adds is generalizing to state/crop/season combinations absent from the training rows, with error measured on held-out data.
@@ -62,18 +64,14 @@ The 107.63 → 2.04 progression only exists because a deliberately weak baseline
 
 ## Running it
 
-The trained model isn't checked into this repo (it's ~300MB). To run the app locally:
+The trained model isn't checked into this repo (it's ~300MB, over GitHub's 100MB limit). Instead, `app.py` trains it itself the first time it runs, from `data/crop_clean.csv`, and caches the result — you'll see a live progress log and a training-time counter (usually 1-2 minutes) on that first run only; every run after loads the cached model instantly.
 
 ```bash
 pip install -r requirements.txt
-```
-
-1. Open `notebooks/01_eda.ipynb` and run all cells top to bottom. This regenerates `models/model.pkl`, `models/columns.pkl`, and `models/options.pkl` from `data/crop_clean.csv`.
-2. Then launch the app:
-
-```bash
 streamlit run app.py
 ```
+
+To explore the cleaning and modelling process itself (not just run the app), open `notebooks/01_eda.ipynb`.
 
 ## Repo structure
 

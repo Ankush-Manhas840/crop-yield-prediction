@@ -1,4 +1,6 @@
 import os
+import threading
+import time
 
 import joblib
 import pandas as pd
@@ -18,30 +20,67 @@ def load_or_train():
         options = joblib.load(OPTIONS_PATH)
         return model, columns, options
 
-    df = pd.read_csv("data/crop_clean.csv")
-    df = df[~((df.Crop == "Sugarcane") & (df.Yield > 200))]
+    with st.status(
+        "First run on this server — no cached model found. Training now, this usually takes 1-2 minutes.",
+        expanded=True,
+    ) as status:
+        log_lines = ["$ starting up..."]
+        log_box = st.empty()
+        log_box.code("\n".join(log_lines), language="bash")
 
-    X = pd.get_dummies(
-        df[["State_Name", "Crop_Year", "Season", "Crop", "Area"]],
-        columns=["State_Name", "Season", "Crop"],
-    )
-    y = df["Yield"]
+        df = pd.read_csv("data/crop_clean.csv")
+        df = df[~((df.Crop == "Sugarcane") & (df.Yield > 200))]
+        log_lines.append(f"$ loaded data/crop_clean.csv ({len(df):,} rows)")
+        log_box.code("\n".join(log_lines), language="bash")
 
-    model = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
-    model.fit(X, y)
+        X = pd.get_dummies(
+            df[["State_Name", "Crop_Year", "Season", "Crop", "Area"]],
+            columns=["State_Name", "Season", "Crop"],
+        )
+        y = df["Yield"]
+        log_lines.append(f"$ built {X.shape[1]} one-hot features")
+        log_lines.append("$ training RandomForestRegressor (100 trees)...")
+        log_box.code("\n".join(log_lines), language="bash")
 
-    columns = X.columns.tolist()
-    options = {
-        "states": sorted(df.State_Name.unique()),
-        "crops": sorted(df.Crop.unique()),
-        "seasons": sorted(df.Season.unique()),
-        "years": sorted(df.Crop_Year.unique()),
-    }
+        result = {}
 
-    os.makedirs("models", exist_ok=True)
-    joblib.dump(model, MODEL_PATH)
-    joblib.dump(columns, COLUMNS_PATH)
-    joblib.dump(options, OPTIONS_PATH)
+        def _fit():
+            m = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
+            m.fit(X, y)
+            result["model"] = m
+
+        timer = st.empty()
+        thread = threading.Thread(target=_fit)
+        start = time.time()
+        thread.start()
+        while thread.is_alive():
+            elapsed = time.time() - start
+            timer.metric("Training elapsed", f"{elapsed:.0f}s")
+            time.sleep(1)
+        thread.join()
+        elapsed = time.time() - start
+        timer.metric("Training elapsed", f"{elapsed:.0f}s (done)")
+
+        model = result["model"]
+        columns = X.columns.tolist()
+        options = {
+            "states": sorted(df.State_Name.unique()),
+            "crops": sorted(df.Crop.unique()),
+            "seasons": sorted(df.Season.unique()),
+            "years": sorted(df.Crop_Year.unique()),
+        }
+
+        os.makedirs("models", exist_ok=True)
+        joblib.dump(model, MODEL_PATH)
+        joblib.dump(columns, COLUMNS_PATH)
+        joblib.dump(options, OPTIONS_PATH)
+
+        log_lines.append(f"$ training complete in {elapsed:.0f}s, model cached for future runs")
+        log_box.code("\n".join(log_lines), language="bash")
+        status.update(
+            label=f"Model trained in {elapsed:.0f}s and cached — this only happens once.",
+            state="complete",
+        )
 
     return model, columns, options
 
