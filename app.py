@@ -5,11 +5,15 @@ import time
 import joblib
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from sklearn.ensemble import RandomForestRegressor
+
+st.set_page_config(page_title="Crop Yield Predictor", page_icon="🌾", layout="centered")
 
 MODEL_PATH = "models/model.pkl"
 COLUMNS_PATH = "models/columns.pkl"
 OPTIONS_PATH = "models/options.pkl"
+PIPELINE_SVG_PATH = "assets/pipeline.svg"
 
 
 @st.cache_resource
@@ -94,7 +98,14 @@ if os.path.exists(MODEL_PATH):
 else:
     model, columns, options = train_and_cache()
 
-st.title("Crop Yield Predictor")
+st.title("🌾 Crop Yield Predictor")
+st.caption("Predicts yield (tonnes/hectare) for Rice, Wheat, Maize, and Sugarcane in India.")
+
+with st.expander("How this model works", expanded=False):
+    with open(PIPELINE_SVG_PATH, encoding="utf-8") as f:
+        components.html(f.read(), height=580, scrolling=False)
+
+st.divider()
 
 state = st.selectbox("State", options["states"])
 crop = st.selectbox("Crop", options["crops"])

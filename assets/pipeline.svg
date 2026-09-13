@@ -1,0 +1,107 @@
+<svg viewBox="0 0 1180 560" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1180" height="560" fill="#0e1117" rx="12" />
+
+  <text x="30" y="38" fill="#e2e8f0" font-size="20" font-weight="600">Training (offline — happens once, in the notebook or on first app run)</text>
+
+  <!-- Row 1: training pipeline -->
+  <g font-size="13.5">
+    <!-- Box 1: raw data -->
+    <rect x="20" y="60" width="150" height="92" rx="10" fill="#1a2332" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="95" y="92" fill="#93c5fd" text-anchor="middle" font-weight="600">Raw data</text>
+    <text x="95" y="112" fill="#cbd5e1" text-anchor="middle">246,091 rows</text>
+    <text x="95" y="130" fill="#94a3b8" text-anchor="middle" font-size="11.5">data.gov.in</text>
+    <text x="95" y="145" fill="#94a3b8" text-anchor="middle" font-size="11.5">(via GitHub mirror)</text>
+
+    <!-- Box 2: cleaning -->
+    <rect x="200" y="60" width="170" height="92" rx="10" fill="#241d12" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="285" y="84" fill="#fcd34d" text-anchor="middle" font-weight="600">Clean</text>
+    <text x="285" y="102" fill="#cbd5e1" text-anchor="middle" font-size="11.5">drop nulls / zero-prod</text>
+    <text x="285" y="117" fill="#cbd5e1" text-anchor="middle" font-size="11.5">filter to 4 crops</text>
+    <text x="285" y="132" fill="#cbd5e1" text-anchor="middle" font-size="11.5">drop incomplete 2015</text>
+    <text x="285" y="147" fill="#cbd5e1" text-anchor="middle" font-size="11.5">drop sugarcane outliers</text>
+
+    <!-- Box 3: clean data -->
+    <rect x="410" y="60" width="140" height="92" rx="10" fill="#1a2332" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="480" y="92" fill="#93c5fd" text-anchor="middle" font-weight="600">Clean data</text>
+    <text x="480" y="112" fill="#cbd5e1" text-anchor="middle">44,257 rows</text>
+    <text x="480" y="130" fill="#94a3b8" text-anchor="middle" font-size="11.5">crop_clean.csv</text>
+
+    <!-- Box 4: feature engineering -->
+    <rect x="590" y="60" width="170" height="92" rx="10" fill="#241428" stroke="#a855f7" stroke-width="1.5"/>
+    <text x="675" y="84" fill="#d8b4fe" text-anchor="middle" font-weight="600">Feature engineering</text>
+    <text x="675" y="103" fill="#cbd5e1" text-anchor="middle" font-size="11.5">one-hot: State, Season,</text>
+    <text x="675" y="118" fill="#cbd5e1" text-anchor="middle" font-size="11.5">Crop + raw Year, Area</text>
+    <text x="675" y="136" fill="#94a3b8" text-anchor="middle" font-size="11.5">→ 45 feature columns</text>
+
+    <!-- Box 5: split -->
+    <rect x="800" y="60" width="140" height="92" rx="10" fill="#0f2a20" stroke="#10b981" stroke-width="1.5"/>
+    <text x="870" y="92" fill="#6ee7b7" text-anchor="middle" font-weight="600">Train / test split</text>
+    <text x="870" y="112" fill="#cbd5e1" text-anchor="middle" font-size="11.5">80% / 20%</text>
+    <text x="870" y="130" fill="#94a3b8" text-anchor="middle" font-size="11.5">random_state=42</text>
+
+    <!-- Box 6: model training -->
+    <rect x="980" y="60" width="180" height="92" rx="10" fill="#0f2a20" stroke="#10b981" stroke-width="1.5"/>
+    <text x="1070" y="84" fill="#6ee7b7" text-anchor="middle" font-weight="600">RandomForestRegressor</text>
+    <text x="1070" y="103" fill="#cbd5e1" text-anchor="middle" font-size="11.5">100 trees</text>
+    <text x="1070" y="121" fill="#94a3b8" text-anchor="middle" font-size="11.5">MAE 107.63 → 2.04</text>
+    <text x="1070" y="138" fill="#94a3b8" text-anchor="middle" font-size="11.5">(baseline → final)</text>
+  </g>
+
+  <!-- Row 1 arrows -->
+  <path d="M170,106 H198" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+  <path d="M370,106 H408" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+  <path d="M550,106 H588" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+  <path d="M760,106 H798" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+  <path d="M940,106 H978" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+
+  <!-- Trained model artifact box -->
+  <rect x="980" y="200" width="180" height="60" rx="10" fill="#0f2a20" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="1070" y="224" fill="#6ee7b7" text-anchor="middle" font-weight="600" font-size="13.5">Trained model</text>
+  <text x="1070" y="243" fill="#94a3b8" text-anchor="middle" font-size="11.5">cached (models/model.pkl)</text>
+  <path d="M1070,152 V198" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+
+  <!-- connector down to inference row -->
+  <path d="M1070,260 V300 H95 V318" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arrow)" fill="none"/>
+
+  <text x="30" y="352" fill="#e2e8f0" font-size="20" font-weight="600">Inference (online — every time you click Predict)</text>
+
+  <!-- Row 2: inference pipeline -->
+  <g font-size="13.5">
+    <!-- Box 1: user input -->
+    <rect x="20" y="374" width="180" height="92" rx="10" fill="#0f2030" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="110" y="398" fill="#7dd3fc" text-anchor="middle" font-weight="600">Your inputs</text>
+    <text x="110" y="417" fill="#cbd5e1" text-anchor="middle" font-size="11.5">State, Crop, Season,</text>
+    <text x="110" y="432" fill="#cbd5e1" text-anchor="middle" font-size="11.5">Year, Area (ha)</text>
+
+    <!-- Box 2: build row -->
+    <rect x="240" y="374" width="200" height="92" rx="10" fill="#241428" stroke="#a855f7" stroke-width="1.5"/>
+    <text x="340" y="398" fill="#d8b4fe" text-anchor="middle" font-weight="600">Build feature row</text>
+    <text x="340" y="417" fill="#cbd5e1" text-anchor="middle" font-size="11.5">45 columns, all 0 except</text>
+    <text x="340" y="432" fill="#cbd5e1" text-anchor="middle" font-size="11.5">your selections set to 1</text>
+
+    <!-- Box 3: predict -->
+    <rect x="480" y="374" width="170" height="92" rx="10" fill="#0f2a20" stroke="#10b981" stroke-width="1.5"/>
+    <text x="565" y="405" fill="#6ee7b7" text-anchor="middle" font-weight="600">model.predict()</text>
+    <text x="565" y="426" fill="#94a3b8" text-anchor="middle" font-size="11.5">averages 100 trees'</text>
+    <text x="565" y="441" fill="#94a3b8" text-anchor="middle" font-size="11.5">independent guesses</text>
+
+    <!-- Box 4: output -->
+    <rect x="690" y="374" width="200" height="92" rx="10" fill="#0f2030" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="790" y="398" fill="#7dd3fc" text-anchor="middle" font-weight="600">Prediction</text>
+    <text x="790" y="417" fill="#cbd5e1" text-anchor="middle" font-size="11.5">Yield (t/ha) +</text>
+    <text x="790" y="432" fill="#cbd5e1" text-anchor="middle" font-size="11.5">estimated production (t)</text>
+  </g>
+
+  <!-- Row 2 arrows -->
+  <path d="M200,420 H238" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+  <path d="M440,420 H478" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+  <path d="M650,420 H688" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" fill="none"/>
+
+  <text x="30" y="500" fill="#64748b" font-size="12">Note: the model interpolates within its training data — it does not forecast future years. See README for limitations.</text>
+</svg>

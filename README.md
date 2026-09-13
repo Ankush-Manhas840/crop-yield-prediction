@@ -41,6 +41,8 @@ A per-crop unit-conversion table was considered and rejected: conversion factors
 
 ## Modelling
 
+![Pipeline: raw data through cleaning and feature engineering to a trained RandomForest, then the inference flow from user input to prediction](assets/pipeline.svg)
+
 Features: `State_Name`, `Crop_Year`, `Season`, `Crop`, `Area` — one-hot encoded to 45 columns. `District_Name` was deliberately dropped: 646 unique values would add 646 sparse columns against ~44k rows. Target-encoding it is a logical next step, not done in v1.
 
 Split: 80/20 train/test, `random_state=42` (35,445 / 8,862 rows).
