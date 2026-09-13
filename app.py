@@ -1,10 +1,52 @@
-import streamlit as st
-import pandas as pd
-import joblib
+import os
 
-model = joblib.load("models/model.pkl")
-columns = joblib.load("models/columns.pkl")
-options = joblib.load("models/options.pkl")
+import joblib
+import pandas as pd
+import streamlit as st
+from sklearn.ensemble import RandomForestRegressor
+
+MODEL_PATH = "models/model.pkl"
+COLUMNS_PATH = "models/columns.pkl"
+OPTIONS_PATH = "models/options.pkl"
+
+
+@st.cache_resource
+def load_or_train():
+    if os.path.exists(MODEL_PATH):
+        model = joblib.load(MODEL_PATH)
+        columns = joblib.load(COLUMNS_PATH)
+        options = joblib.load(OPTIONS_PATH)
+        return model, columns, options
+
+    df = pd.read_csv("data/crop_clean.csv")
+    df = df[~((df.Crop == "Sugarcane") & (df.Yield > 200))]
+
+    X = pd.get_dummies(
+        df[["State_Name", "Crop_Year", "Season", "Crop", "Area"]],
+        columns=["State_Name", "Season", "Crop"],
+    )
+    y = df["Yield"]
+
+    model = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
+    model.fit(X, y)
+
+    columns = X.columns.tolist()
+    options = {
+        "states": sorted(df.State_Name.unique()),
+        "crops": sorted(df.Crop.unique()),
+        "seasons": sorted(df.Season.unique()),
+        "years": sorted(df.Crop_Year.unique()),
+    }
+
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(model, MODEL_PATH)
+    joblib.dump(columns, COLUMNS_PATH)
+    joblib.dump(options, OPTIONS_PATH)
+
+    return model, columns, options
+
+
+model, columns, options = load_or_train()
 
 st.title("Crop Yield Predictor")
 
