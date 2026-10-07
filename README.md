@@ -8,6 +8,8 @@ A portfolio project that predicts crop yield (tonnes per hectare) for four India
 
 ## Data
 
+> **Updated to 1997–2022.** The app now trains on newer official data covering 26 years instead of 18. The cleaning and modelling below describe the original analysis on the 1997–2014 file; see [Data update](#data-update-19972022) for what changed and the new results.
+
 Source: [data.gov.in](https://data.gov.in) — "District-wise, season-wise crop production statistics from 1997."
 
 The data.gov.in portal blocks automated downloads, so the raw file here was obtained via a GitHub mirror ([`Aliabdurahman/Prediction-of-crop-Production-in-India`](https://github.com/Aliabdurahman/Prediction-of-crop-Production-in-India)). Its contents match the official dataset description, but byte-identity with the original portal file is unverified.
@@ -55,6 +57,27 @@ Split: 80/20 train/test, `random_state=42` (35,445 / 8,862 rows).
 
 The 107.63 → 2.04 progression only exists because a deliberately weak baseline was built first, and because per-crop error breakdown (not just an aggregate MAE) surfaced the sugarcane problem that a single overall score was hiding.
 
+## Data update (1997–2022)
+
+The original file stopped at 2014 (2015 had only 183 rows). The data was later replaced with the same Directorate of Economics & Statistics series, downloaded from the official [India Data Portal](https://ckandev.indiadataportal.com/dataset/area-production-yield-apy/resource/f980409d-49a2-42ae-9eb0-182365005c04) (Open Data Commons Attribution License), which runs to 2022–23.
+
+**Checked that it's the same series:** for 2005, 99.9% of matching district/crop/season rows have identical area and 98% identical production. Year labels like `2005-2006` map to `Crop_Year` 2005, as in the old file.
+
+**Conversion to the old format** (`data/crop_production.csv`): renamed columns to the original schema, and dropped the new file's `Total` season rows, which sum the other seasons and would double-count. The same cleaning steps were then applied, except step 7: 2015 is now complete (3,027 rows), so no year is dropped.
+
+| | Original data | Updated data |
+|---|---|---|
+| Years | 1997–2014 | **1997–2022** |
+| Cleaned rows (4 crops) | 44,257 | **74,204** |
+| Sugarcane rows with yield > 200 t/ha | 50 | 38 |
+| Linear Regression MAE (before outlier removal) | 107.63 | 6.95 |
+| Random Forest MAE (before outlier removal) | 11.91 | 2.04 |
+| **Random Forest MAE (final)** | **2.04** | **2.00** |
+
+Split: 80/20, `random_state=42` (59,363 / 14,841 rows), 46 one-hot columns (Ladakh appears as a separate UT from 2019).
+
+The official file is much cleaner than the mirror: sugarcane errors that dominated the original analysis (65.15 MAE) are 9.73 here even before outlier removal, so the sugarcane story above belongs to the original file. The final model keeps the same accuracy while covering eight more years. Per-crop MAE on the updated data: Wheat 0.37, Rice 0.44, Maize 0.76, Sugarcane 9.05 t/ha.
+
 ## Limitations
 
 - No weather data. Season is a crude proxy; rainfall (already downloaded, not yet joined) is the biggest missing driver.
@@ -63,10 +86,12 @@ The 107.63 → 2.04 progression only exists because a deliberately weak baseline
 - The app will answer implausible combinations with false confidence (e.g. a state/crop/season pair with near-zero real occurrence still gets a numeric prediction, with no coverage warning).
 - Restricted to 4 crops out of 124 in the raw dataset.
 - The 200 t/ha sugarcane cutoff is a judgement call, not a statistically derived threshold.
+- `notebooks/01_eda.ipynb` documents the original 1997–2014 analysis. Its `Crop_Year < 2015` filter would drop the newer years if rerun on the updated file; the app reads `data/crop_clean.csv` directly.
+- A few implausible maize and rice rows remain in the updated data (7 each above 20 and 15 t/ha); only sugarcane outliers are filtered.
 
 ## Running it
 
-The trained model isn't checked into this repo (it's ~300MB, over GitHub's 100MB limit). Instead, `app.py` trains it itself the first time it runs, from `data/crop_clean.csv`, and caches the result — you'll see a live progress log and a training-time counter (usually 1-2 minutes) on that first run only; every run after loads the cached model instantly.
+The trained model isn't checked into this repo (it's ~600MB, over GitHub's 100MB limit). Instead, `app.py` trains it itself the first time it runs, from `data/crop_clean.csv`, and caches the result — you'll see a live progress log and a training-time counter (usually 1-2 minutes) on that first run only; every run after loads the cached model instantly.
 
 ```bash
 pip install -r requirements.txt
@@ -80,7 +105,7 @@ To explore the cleaning and modelling process itself (not just run the app), ope
 ```
 crop-yield-prediction/
 ├── data/
-│   ├── crop_production.csv     raw data
+│   ├── crop_production.csv     raw data, 1997–2022 (official DES series)
 │   ├── crop_clean.csv          cleaned data
 │   └── rainfall.csv            downloaded, not yet used
 ├── models/                     generated by the notebook — not checked in
